@@ -5,17 +5,11 @@ class Araknid_Request {
 
 	protected $uri;
 	protected $method;
-	protected $data;
+	protected $rawData;
 
 	public function __construct() {
-		$this->uri 	= trim(trim($_SERVER['REQUEST_URI'], ' /'));
-		$this->method 	= $_SERVER['REQUEST_METHOD'];
-		if (strtoupper($this->method) === 'PUT')
-			$this->data	= file_get_contents('php://input');
-	}
-
-	public function getUri() {
-		return $this->uri;
+		$this->uri 		= '/'. trim(trim($_SERVER['REQUEST_URI'], ' /'));
+		$this->method 	= strtoupper($_SERVER['REQUEST_METHOD']);
 	}
 
 	public function getMethod() {
@@ -23,7 +17,13 @@ class Araknid_Request {
 	}
 
 	public function getRawData() {
-		return $this->data;
+		if (null === $this->rawData && $this->method === 'PUT') 
+			$this->rawData	= file_get_contents('php://input', FILE_BINARY);
+		return $this->rawData;
+	}
+
+	public function __toString() {
+		return $this->uri;
 	}
 
 	static function getInstance() {
