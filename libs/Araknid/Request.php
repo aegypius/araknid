@@ -10,7 +10,7 @@ class Araknid_Request {
 
 	public function __construct() {
 		$this->baseUrl	= '/' . trim($_SERVER['SCRIPT_NAME'], ' /');
-		$this->uri 		= '/' . trim(trim(str_replace($this->baseUrl, '', $_SERVER['REQUEST_URI']), ' /'));
+		$this->uri 		= '/' . trim(preg_replace('`^' . preg_quote(dirname($this->baseUrl)) .'(/'.preg_quote(basename($this->baseUrl)).')?`', '', $_SERVER['REQUEST_URI']), ' /');
 		$this->method 	= strtoupper($_SERVER['REQUEST_METHOD']);
 	}
 
