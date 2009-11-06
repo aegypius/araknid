@@ -4,11 +4,13 @@ class Araknid_Request {
 	static $instance;
 
 	protected $uri;
+	protected $baseUrl;
 	protected $method;
 	protected $rawData;
 
 	public function __construct() {
-		$this->uri 		= '/'. trim(trim($_SERVER['REQUEST_URI'], ' /'));
+		$this->baseUrl	= '/' . trim($_SERVER['SCRIPT_NAME'], ' /');
+		$this->uri 		= '/' . trim(trim(str_replace($this->baseUrl, '', $_SERVER['REQUEST_URI']), ' /'));
 		$this->method 	= strtoupper($_SERVER['REQUEST_METHOD']);
 	}
 
@@ -20,6 +22,10 @@ class Araknid_Request {
 		if (null === $this->rawData && $this->method === 'PUT') 
 			$this->rawData	= file_get_contents('php://input', FILE_BINARY);
 		return $this->rawData;
+	}
+
+	public function getBaseUrl() {
+		return $this->baseUrl;
 	}
 
 	public function __toString() {
