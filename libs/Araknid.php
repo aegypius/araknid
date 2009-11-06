@@ -31,7 +31,7 @@ if ((!defined('ARAKNID_AUTOLOAD')) || (ARAKNID_AUTOLOAD == true)) {
 	function __autoload($className) {
 		$classFile = join(DIRECTORY_SEPARATOR, array_map('ucfirst', explode('_', $className)))
 			   . (!defined('PHP_EXT') ? '.php' : PHP_EXT);
-		@include $classFile;
+		include $classFile;
 	}
 }
 
