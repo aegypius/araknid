@@ -2,13 +2,18 @@
 
 class Araknid {
 	const VERSION = "0.1";
-	static $instance;
+/* --------------------------------------------------------------------
+  Protected:
+-------------------------------------------------------------------- */
 	protected $router;
 	protected $request;
 
+/* --------------------------------------------------------------------
+  Public:
+-------------------------------------------------------------------- */
 	public function __construct() {
 		$this->request = Araknid_Request::getInstance();
-		$this->router = Araknid_Router::getInstance();
+		$this->router  = Araknid_Router::getInstance();
 	}
 
 	public function getRouter() {
@@ -19,6 +24,10 @@ class Araknid {
 		return $this->request;
 	}
 
+/* --------------------------------------------------------------------
+  Static:
+-------------------------------------------------------------------- */
+	static $instance;
 	static function getInstance() {
 		if (null === self::$instance)
 			self::$instance = new self();
@@ -26,12 +35,16 @@ class Araknid {
 	}
 }
 
-/* Autoloader -------------------------------------------------------------- */
+/* Autoloader ------------------------------------------------------ */
 if ((!defined('ARAKNID_AUTOLOAD')) || (ARAKNID_AUTOLOAD == true)) {
 	function __autoload($className) {
 		$classFile = join(DIRECTORY_SEPARATOR, array_map('ucfirst', explode('_', $className)))
 			   . (!defined('PHP_EXT') ? '.php' : PHP_EXT);
 		include $classFile;
 	}
+
+	/* Initializing Log System ------------------------------------- */
+	Araknid_Log::getInstance();
 }
+
 
