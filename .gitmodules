@@ -1,0 +1,3 @@
+[submodule "apps/sample"]
+	path = apps/sample
+	url = git://github.com/aegypius/araknid-sample.git
