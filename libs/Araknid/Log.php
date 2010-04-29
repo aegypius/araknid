@@ -10,7 +10,7 @@ class Araknid_Log {
 	protected $path;
 
 	protected function Araknid_Log() {
-		if (!openlog('AraknikLog', LOG_ODELAY, LOG_USER))
+		if (!openlog('AraknidLog', LOG_ODELAY, LOG_USER))
 			throw new Exeception('syslog is not available on this system');
 		self::debug('Initilializing '.__CLASS__);
 	}
