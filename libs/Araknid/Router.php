@@ -41,7 +41,7 @@ class Araknid_Router {
 				switch ($seg) {
 					case ':module'     : $seg = '(?<module>[^\/]+)';     break;
 					case ':controller' : $seg = '(?<controller>[^\/]+)'; break;
-					case ':action'     : $seg = '(?<action>[^\/]+)?';     break;
+					case ':action'     : $seg = '(?<action>[^\/]+)';     break;
 				}
 			}
 			$route = '/^\/' . implode('\/', $segs). '/';
@@ -56,7 +56,6 @@ class Araknid_Router {
 
 				$classname = ucfirst(strtolower($controller)) . 'Controller';
 				$filename = $path . DIRECTORY_SEPARATOR . trim(join(DIRECTORY_SEPARATOR, array($module, $controller)) . PHP_EXT, DIRECTORY_SEPARATOR);
-				
 
 				$found = false;
 				foreach ($items as $item) {
@@ -72,13 +71,9 @@ class Araknid_Router {
 		return false;
 	}
 
-	
-	
 	protected function initController($callback) {
 		if ($callback == false) {
-			header('HTTP/1.1 404 Not Found');
-			print 'Not Found';
-			return;
+			throw new Araknid_Exception('Not Found', 404);
 		}
 		list($class, $method) = $callback;
 		$R = new ReflectionClass($class);
