@@ -12,7 +12,6 @@ class Araknid_Log {
 	protected function Araknid_Log() {
 		if (!openlog('AraknidLog', LOG_ODELAY, LOG_USER))
 			throw new Exeception('syslog is not available on this system');
-		self::debug('Initilializing '.__CLASS__);
 	}
 
 	protected function write($level, $message) {
@@ -59,3 +58,10 @@ class Araknid_Log {
 		return self::$instance;
 	}
 }
+
+/* --------------------------------------------------------------------
+  Helpers:
+-------------------------------------------------------------------- */
+if (!function_exists('debug'))   {function debug()   {$args=func_get_args(); Araknid_Log::getInstance()->__call(__FUNCTION__, $args);}}
+if (!function_exists('warning')) {function warning() {$args=func_get_args(); Araknid_Log::getInstance()->__call(__FUNCTION__, $args);}}
+if (!function_exists('error'))   {function error()   {$args=func_get_args(); Araknid_Log::getInstance()->__call(__FUNCTION__, $args);}}
