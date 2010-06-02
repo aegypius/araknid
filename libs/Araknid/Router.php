@@ -7,7 +7,12 @@ class Araknid_Router {
 
 	public function Araknid_Router() {
 		$this->routes(array());
-		$this->request($_SERVER['PATH_INFO']);
+		$this->request('/'.trim($_SERVER['PATH_INFO'], '/'));
+	}
+
+	public function __get($property) {
+		if ($p == 'request')
+			return $this->request;
 	}
 
 	public function request($request) {
