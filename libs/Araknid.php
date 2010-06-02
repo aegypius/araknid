@@ -19,16 +19,32 @@ class Araknid {
 		set_error_handler(array(__CLASS__, "errorHandler"));
 		set_exception_handler(array(__CLASS__, "exceptionHandler"));
 
-		$this->request = Araknid_Request::getInstance();
+		//$this->request = Araknid_Request::getInstance();
 		$this->router  = Araknid_Router::getInstance();
-	}
 
-	public function getRouter() {
-		return $this->router;
-	}
+		// Setup default routes
+		$this->router->routes(array(
+			'/'                    => array('controller' => 'main', 'action' => 'index'), 
+			'/:controller'         => array('action' => 'index'), 
+			'/:controller/:action' => array()
+		));
 
-	public function getRequest() {
-		return $this->request;
+		if (!($route = $this->router->execute())) {
+			throw new Exception('No Routes');
+		}
+
+		// Initializing controller
+		if (is_callable(array($route->controller, $route->action)) && class_exists($route->controller)) {
+			$R = new ReflectionClass($route->controller);
+			$O = $R->newInstance($route->params['id']);
+			$O->params = $route->params;
+			$method = $route->action;
+			$response = $O->$method();
+			// $response = call_user_func_array(array(&$O, $route->action),  $route->params);
+			return;
+		} else if (!class_exists($route->controller)) {
+			throw new Exception("Not A Valid Controller: '{$route->controller}'");
+		}
 	}
 
 /* --------------------------------------------------------------------
@@ -97,10 +113,29 @@ class Araknid {
 
 /* Autoloader ------------------------------------------------------ */
 if ((!defined('ARAKNID_AUTOLOAD')) || (ARAKNID_AUTOLOAD == true)) {
-	function __autoload($className) {
-		$classFile = join(DIRECTORY_SEPARATOR, array_map('ucfirst', explode('_', $className)))
-			   . (!defined('PHP_EXT') ? '.php' : PHP_EXT);
-		@include $classFile;
+	function __autoload($classname) {
+		// Retrieving include path
+		$path     = explode(PATH_SEPARATOR, dirname(__FILE__) . PATH_SEPARATOR . get_include_path());
+
+		// Convert path to absolute paths
+		foreach ($path as &$p)
+			$p    = realpath($p);
+
+		// Convert classname to path
+		$ext      = (defined('PHP_EXT') ? PHP_EXT : pathinfo(__FILE__, PATHINFO_EXTENSION));
+		$filepath = implode(DIRECTORY_SEPARATOR, explode('_', $classname)) . $ext;
+
+		// Let's search class file without case-sensitivness
+		foreach ($path as $p) {
+			$items = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($p), RecursiveIteratorIterator::SELF_FIRST);
+			foreach ($items as $item) {
+				if ($item->isFile() && (strtolower($p . DIRECTORY_SEPARATOR . $filepath) == strtolower($item->getRealpath()))) {
+					include $item->getRealpath();
+					if (class_exists($classname))
+						return;
+				}
+			}
+		}
 	}
 
 	/* Initializing Log System ------------------------------------- */
