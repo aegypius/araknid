@@ -13,9 +13,10 @@ class Araknid {
   Public:
 -------------------------------------------------------------------- */
 	public function __construct() {
-		debug('Initializing '.__CLASS__);
 
+		debug('Initializing '.__CLASS__);
 		// Register Exception Handlers
+
 		set_error_handler(array(__CLASS__, "errorHandler"));
 		set_exception_handler(array(__CLASS__, "exceptionHandler"));
 
@@ -24,13 +25,13 @@ class Araknid {
 
 		// Setup default routes
 		$this->router->routes(array(
-			'/'                    => array('controller' => 'main', 'action' => 'index'), 
-			'/:controller'         => array('action' => 'index'), 
+			'/'                    => array('controller' => 'main', 'action' => 'index'),
+			'/:controller'         => array('action' => 'index'),
 			'/:controller/:action' => array()
 		));
 
 		if (!($route = $this->router->execute())) {
-			throw new Exception('No Routes');
+			throw new Exception('No Route for ' . $this->router->request);
 		}
 
 		// Initializing controller
@@ -100,7 +101,7 @@ class Araknid {
 				print $msg;
 				return;
 
-			case 'ErrorException' : 
+			case 'ErrorException' :
 		}
 		printf(
 			'<h1>%s</h1>'  .
@@ -113,28 +114,12 @@ class Araknid {
 
 /* Autoloader ------------------------------------------------------ */
 if ((!defined('ARAKNID_AUTOLOAD')) || (ARAKNID_AUTOLOAD == true)) {
-	function __autoload($classname) {
-		// Retrieving include path
-		$path     = explode(PATH_SEPARATOR, dirname(__FILE__) . PATH_SEPARATOR . get_include_path());
-
-		// Convert path to absolute paths
-		foreach ($path as &$p)
-			$p    = realpath($p);
-
-		// Convert classname to path
-		$ext      = (defined('PHP_EXT') ? PHP_EXT : pathinfo(__FILE__, PATHINFO_EXTENSION));
-		$filepath = implode(DIRECTORY_SEPARATOR, explode('_', $classname)) . $ext;
-
-		// Let's search class file without case-sensitivness
-		foreach ($path as $p) {
-			$items = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($p), RecursiveIteratorIterator::SELF_FIRST);
-			foreach ($items as $item) {
-				if ($item->isFile() && (strtolower($p . DIRECTORY_SEPARATOR . $filepath) == strtolower($item->getRealpath()))) {
-					include $item->getRealpath();
-					if (class_exists($classname))
-						return;
-				}
-			}
+	include_once dirname(__FILE__).'/Araknid/Loader.php';
+	if (function_exists('spl_autoload_register')) {
+		spl_autoload_register(array('Araknid_Loader', 'loader'));
+	} else {
+		function __autoload($classname) {
+			Araknid_Loader::loader($classname);
 		}
 	}
 
