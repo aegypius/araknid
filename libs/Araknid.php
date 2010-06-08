@@ -24,11 +24,19 @@ class Araknid {
 		$this->router  = Araknid_Router::getInstance();
 
 		// Setup default routes
-		$this->router->routes(array(
+		$defaults = array(
 			'/'                    => array('controller' => 'main', 'action' => 'index'),
 			'/:controller'         => array('action' => 'index'),
 			'/:controller/:action' => array()
-		));
+		);
+
+		// Looking for a routes.php in Application directory
+		if (file_exists(APP_CONFIG_PATH . '/routes.php')) {
+			include APP_CONFIG_PATH . '/routes.php';
+			$this->router->routes(array_merge($cfg['routes'], $defaults));
+		} else {
+			$this->router->routes($defaults);
+		}
 
 		if (!($route = $this->router->execute())) {
 			throw new Exception('No Route for ' . $this->router->request);
