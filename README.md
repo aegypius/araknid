@@ -26,11 +26,13 @@ Araknid is able to handle multiple applications with only one set of
 libraries.
 
 Start cloning araknid repo :
-  git clone git://github.com/aegypius/araknid.git my-araknid-projects
+
+    git clone git://github.com/aegypius/araknid.git my-araknid-projects
 
 You can pull the sample application like this :
-  cd my-araknid-projects
-  git submodule update --init
+
+    cd my-araknid-projects
+    git submodule update --init
 
 The document root of this sample application is in apps/sample/public.
 Configure your web server with this directory
