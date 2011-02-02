@@ -1,13 +1,11 @@
 <?php
-
 class Araknid_Loader {
 
    // Protected : ------------------------------------------------------
    protected $callbacks = array();
-
    protected function __construct() {
       // Register default callback
-      $this->callbacks[] = array(&$this, 'pear_loader');
+      $this->callbacks[] = array('Araknid_Loader', 'pear_loader');
    }
 
    protected function pear_loader($classname) {
@@ -22,36 +20,23 @@ class Araknid_Loader {
       $ext      = (defined('PHP_EXT') ? PHP_EXT : pathinfo(__FILE__, PATHINFO_EXTENSION));
       $filepath = implode(DIRECTORY_SEPARATOR, explode('_', $classname)) . $ext;
 
+     // Let's search class file with case
+     if (@include $filepath)
+      if (class_exists($classname) || interface_exists($classname))
+         return;
+
       // Let's search class file without case-sensitivness
       foreach ($path as $p) {
          $items = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($p), RecursiveIteratorIterator::SELF_FIRST);
          foreach ($items as $item) {
             if ($item->isFile() && (strtolower($p . DIRECTORY_SEPARATOR . $filepath) == strtolower($item->getRealpath()))) {
                include $item->getRealpath();
-               if (class_exists($classname))
+               if (class_exists($classname) || interface_exists($classname))
                   return;
             }
          }
       }
    }
-
-   // Public : ------------------------------------------------------
-   public function controller($class, $data = array()) {
-
-   }
-
-
-   public function view($view) {
-      $paths = explode(PATH_SEPARATOR, APP_VIEWS_PATH);
-      foreach ($paths as $path) {
-         $f = join('/', array($path, $view));
-         if (!strpos(PHP_EXT, $view)) $f .= PHP_EXT;
-         if (file_exists($f))
-            return $f;
-      }
-      throw new Exception("View Not Found : $view");
-   }
-
 
    // Static : ---------------------------------------------------------
    static function & register($callback) {
@@ -59,15 +44,17 @@ class Araknid_Loader {
       if (!is_callable($callback))
          throw new Exception('Argument is not a valid callback.');
       if (!in_array($callback, $callbacks))
-         $callbacks[] = $callback;
+         $callbacks = array_merge(array($callback), $callbacks);
       return self::getInstance();
    }
 
    static function loader($class) {
       reset(self::getInstance()->callbacks);
-      while (!class_exists($class) && (list(,$callback) = each(self::getInstance()->callbacks))) {
+      while (!(class_exists($class) || interface_exists($class)) && (list(,$callback) = each(self::getInstance()->callbacks))) {
           call_user_func_array($callback, array($class));
       }
+      if (!(class_exists($class) || interface_exists($class)))
+         syslog(LOG_ALERT, 'Class ' . $class . ' was not autoloaded');
    }
 
    static $instance;
